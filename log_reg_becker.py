@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 def gen_data():
     np.random.seed()
-    num_observations = 5000
+    num_observations = 1000
 
     x1 = np.random.multivariate_normal([0, 0], [[1, .75], [.75, 1]], num_observations)
     x2 = np.random.multivariate_normal([1, 4], [[1, .75], [.75, 1]], num_observations)
@@ -68,5 +68,6 @@ def run_preds(simulated_separableish_features, simulated_labels, add_intercept=T
                                                      simulated_separableish_features))
     final_scores = np.dot(simulated_separableish_features, weights)
     preds = np.round(sigmoid(final_scores))
-
-    print('Accuracy from scratch: {0}'.format((preds == simulated_labels).sum().astype(float) / len(preds)))
+    acc = (preds == simulated_labels).sum().astype(float) / len(preds)
+    print('Accuracy from scratch: {0}'.format(acc))
+    return preds, acc

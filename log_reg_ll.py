@@ -12,13 +12,17 @@ import numpy as np
 def update_B(B_old, X, Y, learning_rate=.001):
     # Note: B_vector is a [Lx1] structure where B*xi is the linearized basis for the guess.
     # Note: Assuming everything is already an np.matrix
+
     p_k = predictions(B_old, X)  # p_k is an Nx1 matrix
+    error = Y - p_k
+
+    # update_value = learning_rate * np.matmul(X, error)
+
     W = prob_weighted_diag(p_k)  # NxN diagonal matrix
     hess = hessian(X, W)
     hess_inv = np.linalg.inv(hess)
-    error = Y - p_k
-    B_new = B_old - learning_rate * np.matmul(np.matmul(hess_inv, X), error)
-    return B_new
+    update_value = learning_rate*np.matmul(np.matmul(hess_inv, X), error)
+    return update_value
 
 
 def hessian(X, W):
@@ -36,7 +40,7 @@ def predictions(B, X):
 
 
 def sigmoid(x):
-    return 1 / (1 + np.exp(-1 * x))
+    return np.exp(-1.0 * x) / (1.0 + np.exp(-1.0 * x))
 
 
 def prob_weighted_diag(p_k):
@@ -48,21 +52,28 @@ def prob_weighted_diag(p_k):
     return W
 
 
-def run_preds(X, Y, add_intercept=True, num_steps=1):
+def run_preds(X, Y, add_intercept=True, num_steps=1, num_batches=1):
     N = X.shape[1]
     if add_intercept:
         X = np.vstack((np.ones(N), X))
     B = np.transpose(np.matrix(np.zeros(X.shape[0])))
-    N_curr = 0
-    batch_size = int(np.ceil(N / num_steps))
-    while N_curr < N:
-        X_batch = X[:, N_curr:(N_curr + batch_size)]
-        Y_batch = Y[N_curr:(N_curr + batch_size), :]
-        B = update_B(B, X_batch, Y_batch, learning_rate=1/num_steps)
-        N_curr = N_curr + batch_size
+    step = 0
+
+    batch_size = int(np.ceil(N / num_batches))
+    while step < num_steps:
+        curr_batch = 0
+        B_update = 0
+        while curr_batch < N:
+            B_update += update_B(B, X[:,curr_batch:curr_batch+batch_size],
+                                 Y[curr_batch:curr_batch+batch_size,:],
+                                 learning_rate=1e-3)
+            curr_batch += batch_size
+        B = B - B_update
+        step += 1
     preds = np.round(predictions(B, X))
-    print('Accuracy from pc: {0}'.format((preds != Y).sum().astype(float) / preds.size))
-    return preds
+    acc = ((preds == Y).sum().astype(float) / preds.size)
+    print('Accuracy from pc: {0}'.format(acc))
+    return preds, acc
 
 
 def main():
