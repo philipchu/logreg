@@ -14,7 +14,7 @@ while True:
 
     pc_rt = timeit.default_timer()
     _, pc_acc = log_reg_ll.run_preds(np.transpose(np.matrix(simulated_separableish_features)),
-                         np.transpose(np.matrix(simulated_labels)), num_steps=1, num_batches=3) #why does batching only work for odds??
+                         np.transpose(np.matrix(simulated_labels)), num_steps=1, num_batches=4) #why does batching only work for odds??
     pc_rt = timeit.default_timer() - pc_rt
     print(pc_rt)
     count += 1

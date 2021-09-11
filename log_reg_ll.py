@@ -58,11 +58,15 @@ def run_preds(X, Y, add_intercept=True, num_steps=1, num_batches=1):
         X = np.vstack((np.ones(N), X))
     B = np.transpose(np.matrix(np.zeros(X.shape[0])))
     step = 0
+    shuffle_ind = np.array(range(N))
+    np.random.shuffle(shuffle_ind)
+    X = X[:, shuffle_ind]
+    Y = Y[shuffle_ind,:]
 
     batch_size = int(np.ceil(N / num_batches))
     while step < num_steps:
         curr_batch = 0
-        B_update = 0
+        B_update = 0.0
         while curr_batch < N:
             B_update += update_B(B, X[:,curr_batch:curr_batch+batch_size],
                                  Y[curr_batch:curr_batch+batch_size,:],
